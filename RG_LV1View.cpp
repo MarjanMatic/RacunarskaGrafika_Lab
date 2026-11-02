@@ -16,6 +16,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+#include <stdexcept>
 
 
 // CRGLV1View
@@ -135,6 +136,9 @@ void CRGLV1View::DrawRegularPolygon(CDC* pDC, int cx, int cy, int r, int n, floa
 }
 
 void CRGLV1View::DrawPolygon(CDC* pDC, CPoint* points, int n) {
+	if (n < 3) {
+		throw std::invalid_argument("Polygon must have at least 3 points");
+	}
 	pDC->Polygon(points, n);
 }
 
