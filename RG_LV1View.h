@@ -40,12 +40,13 @@ protected:
 	int m_cellCount;
 	int m_cellSizePx;
 	CRect m_background;
+	CPoint* m_redTriangle;
 	CPoint* m_whiteTriangle;
 	CPoint* m_purpleRectangle;
 	CPoint* m_orangeTriangle;
 	CPoint* m_yellowTriangle;
-	CPoint* m_redTriangle;
-	CPoint* m_greenTriangle;
+	CPoint* m_pinkTriangle;
+	CPoint* m_greenRectangle;
 	bool m_grid;
 
 	float DegreeToRadian(float degree);

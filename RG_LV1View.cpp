@@ -42,41 +42,48 @@ CRGLV1View::CRGLV1View() noexcept
 	m_cellSizePx = m_sizePx / m_cellCount;
 	m_background = CRect(0, 0, m_sizePx, m_sizePx);
 
-	m_whiteTriangle = new CPoint[3] {
-		{ m_cellSizePx * 1, m_cellSizePx * 6 },
-		{ m_cellSizePx * 4, m_cellSizePx * 3 },
-		{ m_cellSizePx * 7, m_cellSizePx * 6 }
+	m_redTriangle = new CPoint[3] {
+		{ m_cellSizePx * 3, m_cellSizePx * 1 },
+		{ int(m_cellSizePx * 7.5), int(m_cellSizePx * 5.5) },
+		{ m_cellSizePx * 3, m_cellSizePx * 10 }
 	};
-
+	
 	m_purpleRectangle = new CPoint[4] {
-		{ m_cellSizePx * 4,  m_cellSizePx * 6 },
-		{ m_cellSizePx * 7,  m_cellSizePx * 6 },
-		{ m_cellSizePx * 10, m_cellSizePx * 9 },
-		{ m_cellSizePx * 7,  m_cellSizePx * 9 }
+		{ m_cellSizePx * 3,  m_cellSizePx * 1 },
+		{ m_cellSizePx * 8,  m_cellSizePx * 1 },
+		{ int(m_cellSizePx * 12.5), int(m_cellSizePx * 5.5) },
+		{ int(m_cellSizePx * 7.5),  int(m_cellSizePx * 5.5) }
 	};
 
 	m_orangeTriangle = new CPoint[3] {
-		{ m_cellSizePx * 7,  m_cellSizePx * 9  },
-		{ m_cellSizePx * 15, m_cellSizePx * 9  },
-		{ m_cellSizePx * 11, m_cellSizePx * 13 }
+		{ m_cellSizePx * 8,  m_cellSizePx * 1  },
+		{ m_cellSizePx * 17, m_cellSizePx * 1  },
+		{ m_cellSizePx * 17, m_cellSizePx * 10 }
+	};
+
+	m_whiteTriangle = new CPoint[3] {
+		{ m_cellSizePx * 17, m_cellSizePx * 10 },
+		{ m_cellSizePx * 17, int(m_cellSizePx * 14.5) },
+		{ m_cellSizePx * 12, int(m_cellSizePx * 14.5)}
 	};
 
 	m_yellowTriangle = new CPoint[3] {
-		{ m_cellSizePx * 13, m_cellSizePx * 11 },
-		{ m_cellSizePx * 17, m_cellSizePx * 7  },
-		{ m_cellSizePx * 17, m_cellSizePx * 15 }
+		{ m_cellSizePx * 3, m_cellSizePx * 10 },
+		{ m_cellSizePx * 12, m_cellSizePx * 19  },
+		{ m_cellSizePx * 3, m_cellSizePx * 19 }
 	};
 
-	m_redTriangle = new CPoint[3] {
-		{ m_cellSizePx * 14, m_cellSizePx * 14 },
-		{ m_cellSizePx * 14, m_cellSizePx * 17 },
-		{ m_cellSizePx * 11, m_cellSizePx * 17 }
+	m_pinkTriangle = new CPoint[3]{
+		{ int(m_cellSizePx * 7.5),  int(m_cellSizePx * 14.5) },
+		{ m_cellSizePx * 12, int(m_cellSizePx * 14.5) },
+		{ m_cellSizePx * 12, m_cellSizePx * 19 },
 	};
 
-	m_greenTriangle = new CPoint[3] {
-		{ m_cellSizePx * 17, m_cellSizePx * 13 + 8 },
-		{ m_cellSizePx * 19, m_cellSizePx * 15 + 8 },
-		{ m_cellSizePx * 17, m_cellSizePx * 17 + 8 }
+	m_greenRectangle = new CPoint[4]{
+		{ m_cellSizePx * 12, int(m_cellSizePx * 14.5) },
+		{ m_cellSizePx * 17, int(m_cellSizePx * 14.5) },
+		{ m_cellSizePx * 17, m_cellSizePx * 19 },
+		{ m_cellSizePx * 12, m_cellSizePx * 19 }
 	};
 
 	m_grid = false;
@@ -89,7 +96,7 @@ CRGLV1View::~CRGLV1View()
 	delete[] m_orangeTriangle;
 	delete[] m_yellowTriangle;
 	delete[] m_redTriangle;
-	delete[] m_greenTriangle;
+	delete[] m_pinkTriangle;
 }
 
 BOOL CRGLV1View::PreCreateWindow(CREATESTRUCT& cs)
@@ -106,31 +113,20 @@ float CRGLV1View::DegreeToRadian(float degree) {
 }
 
 void CRGLV1View::DrawRegularPolygon(CDC* pDC, int cx, int cy, int r, int n, float rotAngle) {
+	if (n < 3) {
+		throw std::invalid_argument("Polygon must have at least 3 points");
+	}
+
 	CPoint* points = new CPoint[n];
 	float angle = 360.0 / n;
 	float radianAngle = DegreeToRadian(angle);
+	float rotRadian = DegreeToRadian(rotAngle);
 	for (int i = 0; i < n; i++) {
-		points[i].x = r * cos(i * radianAngle);
-		points[i].y = r * sin(i * radianAngle);
+		points[i].x = cx + r * cos(i * radianAngle + rotRadian);
+		points[i].y = cy + r * sin(i * radianAngle + rotRadian);
 	}
 
-	int prevMode = pDC->SetGraphicsMode(GM_ADVANCED);
-
-	float rotRadian = DegreeToRadian(rotAngle);
-	XFORM m = {
-		cos(rotRadian), sin(rotRadian),
-		-sin(rotRadian), cos(rotRadian),
-		cx, cy
-	};
-
-	XFORM oldXform;
-	bool b = pDC->GetWorldTransform(&oldXform);
-	pDC->ModifyWorldTransform(&m, MWT_RIGHTMULTIPLY);
-
 	pDC->Polygon(points, n);
-
-	b = pDC->SetWorldTransform(&oldXform);
-	pDC->SetGraphicsMode(prevMode);
 
 	delete[] points;
 }
@@ -156,24 +152,13 @@ void CRGLV1View::OnDraw(CDC* pDC)
 	CBrush* pOldBrush = (CBrush*)pDC->SelectObject(&grey);
 	pDC->Rectangle(m_background);
 
-	int prevGraphicsMode = pDC->SetGraphicsMode(GM_ADVANCED);
-	XFORM oldXform;
-	bool b = pDC->GetWorldTransform(&oldXform);
+	CPen pinkPen(PS_SOLID, 4, RGB(255, 100, 240));
+	pDC->SelectObject(&pinkPen);
 
-	XFORM xform = {
-		1, 0,
-		0, 1,
-		-2, -5
-	};
-	b = pDC->SetWorldTransform(&xform);
-
-
-	// White triangle
-	CPen yellowPen(PS_SOLID, 4, RGB(255, 255, 0));
-	CBrush white(HS_FDIAGONAL, RGB(0, 0, 255));
-	pDC->SelectObject(&yellowPen);
-	pDC->SelectObject(&white);
-	DrawPolygon(pDC, m_whiteTriangle, 3);
+	// Red triangle
+	CBrush red(RGB(255, 0, 0));
+	pDC->SelectObject(&red);
+	DrawPolygon(pDC, m_redTriangle, 3);
 
 	// Purple rectangle
 	CBrush purple(RGB(150, 0, 150));
@@ -185,37 +170,35 @@ void CRGLV1View::OnDraw(CDC* pDC)
 	pDC->SelectObject(&orange);
 	DrawPolygon(pDC, m_orangeTriangle, 3);
 
+	// White triangle
+	CBrush white(HS_HORIZONTAL, RGB(0, 0, 255));
+	pDC->SelectObject(&white);
+	DrawPolygon(pDC, m_whiteTriangle, 3);
+
 	// Yellow triangle
 	CBrush yellow(RGB(255, 255, 0));
 	pDC->SelectObject(&yellow);
 	DrawPolygon(pDC, m_yellowTriangle, 3);
 
-	// Pink rectangle
-	CBrush pink(RGB(255, 150, 240));
-	pDC->SelectObject(&pink);
-	DrawRegularPolygon(pDC, m_cellSizePx * 13, m_cellSizePx * 13, 50, 4, 0);
-
-	// Red triangle
-	CBrush red(RGB(255, 0, 0));
-	pDC->SelectObject(&red);
-	DrawPolygon(pDC, m_redTriangle, 3);
-
-	// Green triangle
-	CBrush green(RGB(0, 255, 0));
+	// Pink triangle
+	CBrush green(RGB(255, 150, 240));
 	pDC->SelectObject(&green);
-	DrawPolygon(pDC, m_greenTriangle, 3);
+	DrawPolygon(pDC, m_pinkTriangle, 3);
+
+	// Green rectangle
+	CBrush pink(RGB(0, 255, 0));
+	pDC->SelectObject(&pink);
+	DrawPolygon(pDC, m_greenRectangle, 4);
 
 	// Inner polygons
-	CPen yellowPenThin(PS_SOLID, 3, RGB(255, 255, 0));
-	pDC->SelectObject(&yellowPenThin);
+	CPen pinkPenThin(PS_SOLID, 3, RGB(255, 100, 240));
+	pDC->SelectObject(&pinkPenThin);
 	pDC->SelectStockObject(HOLLOW_BRUSH);
-	DrawRegularPolygon(pDC, m_cellSizePx * 4,    m_cellSizePx * 4.8,  16, 10, 0);
-	DrawRegularPolygon(pDC, m_cellSizePx * 11,   m_cellSizePx * 10.6, 20, 7, 0);
-	DrawRegularPolygon(pDC, m_cellSizePx * 13.1, m_cellSizePx * 16.1, 12, 4, 0);
-	DrawRegularPolygon(pDC, m_cellSizePx * 17.8, m_cellSizePx * 15 + 8, 12, 5, 0);
-
-	b = pDC->SetWorldTransform(&oldXform);
-	pDC->SetGraphicsMode(prevGraphicsMode);
+	DrawRegularPolygon(pDC, m_cellSizePx * 5,    m_cellSizePx * 5.5,  25, 6, 0);
+	DrawRegularPolygon(pDC, m_cellSizePx * 14,   m_cellSizePx * 3.5, 30, 5, 0);
+	DrawRegularPolygon(pDC, m_cellSizePx * 15.5, m_cellSizePx * 13, 20, 7, 0);
+	DrawRegularPolygon(pDC, m_cellSizePx * 5.6,  m_cellSizePx * 16.3, 35, 4, 0);
+	DrawRegularPolygon(pDC, m_cellSizePx * 10.8, m_cellSizePx * 15.8, 19, 8, 0);
 
 	if (m_grid) {
 		CPen penWhite(PS_SOLID, 0, RGB(245, 245, 245));
