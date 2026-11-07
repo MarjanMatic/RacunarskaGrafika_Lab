@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.37827.9
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RG_LV1", "RG_LV1.vcxproj", "{C1EF3BBC-BA02-947E-1BBF-58AEF8010E21}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RG_LV1", "RG_LV1\RG_LV1.vcxproj", "{C1EF3BBC-BA02-947E-1BBF-58AEF8010E21}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RG_LV2", "..\RG_LV2\RG_LV2.vcxproj", "{7B554241-22EB-99C5-ACE8-5C2016497C06}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RG_LV2", "RG_LV2\RG_LV2.vcxproj", "{7B554241-22EB-99C5-ACE8-5C2016497C06}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
