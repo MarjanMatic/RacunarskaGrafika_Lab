@@ -109,7 +109,7 @@ BOOL CRGLV1View::PreCreateWindow(CREATESTRUCT& cs)
 
 // CRGLV1View drawing
 float CRGLV1View::DegreeToRadian(float degree) {
-	return degree * 3.14159 / 180;
+	return degree * 3.14159f / 180;
 }
 
 void CRGLV1View::DrawRegularPolygon(CDC* pDC, int cx, int cy, int r, int n, float rotAngle) {
