@@ -129,7 +129,6 @@ void CRGLV2View::DrawFigure(CDC* pDC)
 	Rotate(pDC, 180 + rootAngle); // With root angle
 
 	pDC->PlayMetaFile(cactusLight, CRect(-32, 4, 32, 70));
-
 	pDC->Ellipse(-14, -14, 14, 14);
 
 	Translate(pDC, 0, m_cellSizePx * 3);
@@ -143,16 +142,6 @@ void CRGLV2View::DrawFigure(CDC* pDC)
 
 	Scale(pDC, 1 / 0.4, 1);
 	Translate(pDC, 0, m_cellSizePx * 3);
-	Rotate(pDC, -45);
-	Scale(pDC, 0.6, 1);
-	pDC->PlayMetaFile(cactus, CRect(-32, 4, 32, 70));
-	Scale(pDC, 1 / 0.6, 1);
-	Rotate(pDC, 90);
-	Scale(pDC, 0.6, 1);
-	pDC->PlayMetaFile(cactus, CRect(-32, 4, 32, 70));
-	Scale(pDC, 1 / 0.6, 1);
-	pDC->Ellipse(-14, -14, 14, 14);
-	Translate(pDC, 0, m_cellSizePx * 3);
 	pDC->PlayMetaFile(cactus, CRect(-32, 4, 32, 70));
 	pDC->Ellipse(-14, -14, 14, 14);
 
@@ -160,6 +149,11 @@ void CRGLV2View::DrawFigure(CDC* pDC)
 	pDC->SetWorldTransform(&XformCenter);
 	Scale(pDC, 0.4, 1);
 	pDC->PlayMetaFile(cactus, CRect(-32, 4, 32, 70));
+	Scale(pDC, 1 / 0.4, 1);
+	Translate(pDC, 0, m_cellSizePx * 3);
+	Rotate(pDC, leafAngle);
+	pDC->PlayMetaFile(cactusLight, CRect(-32, 4, 32, 70));
+	pDC->Ellipse(-14, -14, 14, 14);
 
 	// Right side
 	pDC->SetWorldTransform(&XformCenter);
@@ -169,16 +163,6 @@ void CRGLV2View::DrawFigure(CDC* pDC)
 	Scale(pDC, 1 / 0.4, 1);
 	pDC->Ellipse(-14, -14, 14, 14);
 	Translate(pDC, 0, m_cellSizePx * 3);
-	Rotate(pDC, -45 + leafAngle); // With leaf angle
-	Scale(pDC, 0.6, 1);
-	pDC->PlayMetaFile(cactusLight, CRect(-32, 4, 32, 70));
-	Scale(pDC, 1 / 0.6, 1);
-	Rotate(pDC, 90 - leafAngle);
-	Scale(pDC, 0.6, 1);
-	pDC->PlayMetaFile(cactus, CRect(-32, 4, 32, 70));
-	Scale(pDC, 1 / 0.6, 1);
-	pDC->Ellipse(-14, -14, 14, 14);
-	Translate(pDC, 0, m_cellSizePx * 3);
 	Rotate(pDC, -45);
 	Scale(pDC, 0.6, 1);
 	pDC->PlayMetaFile(cactus, CRect(-32, 4, 32, 70));
@@ -187,6 +171,25 @@ void CRGLV2View::DrawFigure(CDC* pDC)
 	Scale(pDC, 0.6, 1);
 	pDC->PlayMetaFile(cactus, CRect(-32, 4, 32, 70));
 	Scale(pDC, 1 / 0.6, 1);
+	pDC->Ellipse(-14, -14, 14, 14);
+
+	Translate(pDC, 0, m_cellSizePx * 3);
+	XFORM rightEnd;
+	pDC->GetWorldTransform(&rightEnd);
+	Rotate(pDC, -45);
+	Scale(pDC, 0.4, 1);
+	pDC->PlayMetaFile(cactus, CRect(-32, 4, 32, 70));
+
+	pDC->SetWorldTransform(&rightEnd);
+	Scale(pDC, 0.4, 1);
+	pDC->PlayMetaFile(cactus, CRect(-32, 4, 32, 70));
+
+	pDC->SetWorldTransform(&rightEnd);
+	Rotate(pDC, 45);
+	Scale(pDC, 0.4, 1);
+	pDC->PlayMetaFile(cactus, CRect(-32, 4, 32, 70));
+
+	pDC->SetWorldTransform(&rightEnd);
 	pDC->Ellipse(-14, -14, 14, 14);
 
 	pDC->SelectObject(pOldPen);
@@ -209,6 +212,12 @@ void CRGLV2View::OnDraw(CDC* pDC)
 	CBrush* pOldBrush = (CBrush*)pDC->SelectObject(&grey);
 	pDC->Rectangle(m_background);
 
+	int prevMode = pDC->SetGraphicsMode(GM_ADVANCED);
+	XFORM oldXform;
+	pDC->GetWorldTransform(&oldXform);
+	Translate(pDC, 500, 0);
+	Rotate(pDC, 90);
+
 	DrawFigure(pDC);
 
 	CPen blackPen(PS_SOLID, 0, RGB(0, 0, 0));
@@ -217,6 +226,8 @@ void CRGLV2View::OnDraw(CDC* pDC)
 	pDC->SelectObject(&brownBrush);
 	pDC->Polygon(m_jarBottom, 4);
 	pDC->Rectangle(m_jarTop);
+
+	pDC->SetWorldTransform(&oldXform);
 
 	if (m_grid) {
 		CPen penWhite(PS_SOLID, 0, RGB(245, 245, 245));
