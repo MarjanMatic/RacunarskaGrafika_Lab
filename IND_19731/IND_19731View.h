@@ -42,7 +42,10 @@ protected:
 	CDC bufferDC;
 
 	DImage* m_images;
+	DImage* m_denoisedImages;
+	CBitmap* m_masks;
 	int m_movingPieceIndex;
+	bool m_firstPass;
 
 	int m_posX;
 	int m_posY;
@@ -54,7 +57,7 @@ protected:
 	void Rotate(CDC* pDC, float angle, bool rightMultiply = false);
 	void Mirror(CDC* pDC, bool mx, bool my, bool rightMultiply = false);
 
-	void DrawPuzzlePiece(CDC* pDC, DImage& img, float x, float y, float angle, float sx = 1, float sy = 1, bool mx = false, bool my = false);
+	void DrawPuzzlePiece(CDC* pDC, DImage& img, float x, float y, float angle, float sx = 1, float sy = 1, bool mx = false, bool my = false, bool filter = false);
 	void GrayFilter(DImage& img);
 	void ColorChannel(DImage& img, bool r, bool g, bool b);
 

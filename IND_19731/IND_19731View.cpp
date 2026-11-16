@@ -50,14 +50,12 @@ CIND19731View::CIND19731View() noexcept
 	{
 		std::string s = "images/" + std::to_string(i + 1) + ".bmp";
 		m_images[i].Load(std::wstring(s.begin(), s.end()).c_str());
-		GrayFilter(m_images[i]);
-		if (i == m_movingPieceIndex)
-			ColorChannel(m_images[i], false, false, true);
 	}
 }
 
 CIND19731View::~CIND19731View()
 {
+	delete[] m_images;
 }
 
 BOOL CIND19731View::PreCreateWindow(CREATESTRUCT& cs)
@@ -124,7 +122,7 @@ void CIND19731View::Mirror(CDC* pDC, bool mx, bool my, bool rightMultiply)
 	Scale(pDC, mx ? -1 : 1, my ? -1 : 1, rightMultiply);
 }
 
-void CIND19731View::DrawPuzzlePiece(CDC* pDC, DImage& img, float x, float y, float angle, float sx, float sy, bool mx, bool my)
+void CIND19731View::DrawPuzzlePiece(CDC* pDC, DImage& img, float x, float y, float angle, float sx, float sy, bool mx, bool my, bool filter)
 {
 	int width = img.Width();
 	int height = img.Height();
@@ -146,14 +144,6 @@ void CIND19731View::DrawPuzzlePiece(CDC* pDC, DImage& img, float x, float y, flo
 	srcDC->BitBlt(0, 0, width, height, initialDC, 0, 0, SRCCOPY);
 	dstDC->SelectObject(&bmpMask);
 
-	COLORREF clrTopLeft = srcDC->GetPixel(0, 0);
-	srcDC->SetBkColor(clrTopLeft);
-	dstDC->BitBlt(0, 0, width, height, srcDC, 0, 0, SRCCOPY);
-
-	srcDC->SetTextColor(RGB(255, 255, 255));
-	srcDC->SetBkColor(RGB(0, 0, 0));
-	srcDC->BitBlt(0, 0, width, height, dstDC, 0, 0, SRCAND);
-
 	XFORM oldXform;
 	pDC->GetWorldTransform(&oldXform);
 
@@ -161,6 +151,26 @@ void CIND19731View::DrawPuzzlePiece(CDC* pDC, DImage& img, float x, float y, flo
 	Rotate(pDC, angle);
 	Scale(pDC, sx, sy);
 	Mirror(pDC, mx, my);
+
+	COLORREF clrTopLeft = srcDC->GetPixel(0, 0);
+	srcDC->SetBkColor(clrTopLeft);
+	dstDC->BitBlt(0, 0, width, height, srcDC, 0, 0, SRCCOPY);
+
+	srcDC->SetBkColor(clrTopLeft ^ 1);
+	dstDC->BitBlt(0, 0, width, height, srcDC, 0, 0, SRCPAINT);
+	srcDC->SetBkColor(clrTopLeft ^ (1 << 8));
+	dstDC->BitBlt(0, 0, width, height, srcDC, 0, 0, SRCPAINT);
+	srcDC->SetBkColor(clrTopLeft ^ (1 << 16));
+	dstDC->BitBlt(0, 0, width, height, srcDC, 0, 0, SRCPAINT);
+
+	srcDC->SetTextColor(RGB(255, 255, 255));
+	srcDC->SetBkColor(RGB(0, 0, 0));
+	DImage newImage(bitmap);
+	GrayFilter(newImage);
+	if (filter)
+		ColorChannel(newImage, false, false, true);
+	srcDC->SelectObject(newImage.GetBitmap());
+	srcDC->BitBlt(0, 0, width, height, dstDC, 0, 0, SRCAND);
 
 	pDC->BitBlt(-width / 2, -height / 2, width, height, dstDC, 0, 0, SRCAND);
 	pDC->BitBlt(-width / 2, -height / 2, width, height, srcDC, 0, 0, SRCPAINT);
@@ -245,7 +255,7 @@ void CIND19731View::OnDraw(CDC* pDC)
 	DrawPuzzlePiece(&bufferDC, m_images[8],   m_cellSizePx * 16.35, m_cellSizePx * 16,     71);
 
 	bufferDC.SetWorldTransform(&oldXform);
-	DrawPuzzlePiece(&bufferDC, m_images[m_movingPieceIndex],   m_posX,  m_posY,    -113, 1, 1, true);
+	DrawPuzzlePiece(&bufferDC, m_images[m_movingPieceIndex],   m_posX,  m_posY,    -113, 1, 1, true, false, true);
 
 	bufferDC.SetGraphicsMode(prevMode);
 	bufferDC.SelectObject(oldBrush);
